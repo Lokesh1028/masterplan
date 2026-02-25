@@ -55,7 +55,7 @@ export default function DashboardPage() {
         </div>
         <div className="bg-white rounded-xl border p-5">
           <h2 className="font-semibold text-gray-900 mb-4">Revenue vs Expenses</h2>
-          {pieData.length > 0 ? (<ResponsiveContainer width="100%" height={280}><PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value" label={({name,percent}: any) => `${name} ${(percent*100).toFixed(0)}%`}>{pieData.map((e,i) => <Cell key={i} fill={e.color}/>)}</Pie><Tooltip formatter={(v:number) => formatCurrency(v, currency)}/></PieChart></ResponsiveContainer>) : <p className="text-gray-400 text-center py-16">No data yet</p>}
+          {pieData.length > 0 ? (<ResponsiveContainer width="100%" height={280}><PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value" label={({name,percent}: any) => `${name} ${(percent*100).toFixed(0)}%`}>{pieData.map((e,i) => <Cell key={i} fill={e.color}/>)}</Pie><Tooltip formatter={(v: any) => formatCurrency(v, currency)}/></PieChart></ResponsiveContainer>) : <p className="text-gray-400 text-center py-16">No data yet</p>}
         </div>
       </div>
       <div className="bg-white rounded-xl border">
