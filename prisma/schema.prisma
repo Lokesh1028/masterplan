@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  storeName     String    @default("") @map("store_name")
+  address       String    @default("")
+  phone         String    @default("")
+  logoUrl       String    @default("") @map("logo_url")
+  taxRate       Float     @default(0) @map("tax_rate")
+  currency      String    @default("INR")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  products      Product[]
+  customers     Customer[]
+  invoices      Invoice[]
+  transactions  Transaction[]
+
+  @@map("users")
+}
+
+model Product {
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  name          String
+  description   String    @default("")
+  costPrice     Float     @map("cost_price")
+  sellingPrice  Float     @map("selling_price")
+  stockQuantity Int       @default(0) @map("stock_quantity")
+  unit          String    @default("pcs")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoiceItems  InvoiceItem[]
+
+  @@index([userId])
+  @@map("products")
+}
+
+model Customer {
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  name          String
+  address       String    @default("")
+  phone         String    @default("")
+  email         String    @default("")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices      Invoice[]
+
+  @@index([userId])
+  @@map("customers")
+}
+
+model Invoice {
+  id                  String    @id @default(cuid())
+  userId              String    @map("user_id")
+  customerId          String?   @map("customer_id")
+  invoiceNumber       String    @map("invoice_number")
+  subtotal            Float     @default(0)
+  taxRate             Float     @default(0) @map("tax_rate")
+  taxAmount           Float     @default(0) @map("tax_amount")
+  discountPercentage  Float     @default(0) @map("discount_percentage")
+  discountAmount      Float     @default(0) @map("discount_amount")
+  totalAmount         Float     @default(0) @map("total_amount")
+  status              String    @default("COMPLETED")
+  notes               String    @default("")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer            Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items               InvoiceItem[]
+
+  @@index([userId])
+  @@index([customerId])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id            String    @id @default(cuid())
+  invoiceId     String    @map("invoice_id")
+  productId     String?   @map("product_id")
+  productName   String    @map("product_name")
+  qty           Int       @default(1)
+  priceAtSale   Float     @map("price_at_sale")
+  costAtSale    Float     @default(0) @map("cost_at_sale")
+  subtotal      Float
+
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product       Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model Transaction {
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  type          String
+  amount        Float
+  description   String    @default("")
+  referenceId   String?   @map("reference_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt(sort: Desc)])
+  @@map("transactions")
+}
